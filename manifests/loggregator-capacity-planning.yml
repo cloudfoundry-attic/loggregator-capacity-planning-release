@@ -1,0 +1,35 @@
+name: loggregator_capacity_planning
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+releases:
+- name: loggregator-capacity-planning
+  version: latest
+
+instance_groups:
+- name: event_counter
+  azs:
+  - z1
+  instances: 1
+  persistent_disk_type: 1GB
+  vm_type: default
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: event_counter
+    release: loggregator-capacity-planning
+    properties:
+      event_counter:
+        loggregator_egress_url: "wss://doppler.((system_domain)):443"
+        datadog_api_key: "((datadog_api_key))"
+        counter_origin: "metricemitter"
+        loggregator_egress_url: "https://uaa.((system_domain))"
+        client_id: "((client_id))"
+        client_secret: "((client_secret))"
+
+
+
