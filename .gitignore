@@ -1,14 +1,49 @@
-config/private.yml
+# golang
+pkg/
+/bin/
+*.prof
+*.mprof
+*.coverprofile
+*.test
+
+# macOS
+.DS_Store
+
+# jetbrains
+.idea
+
+# bosh
+.blobs
 blobs
+.dev_builds
 dev_releases
+config/dev.yml
+config/private.yml
 releases/*.tgz
 releases/**/*.tgz
-.dev_builds
 .final_builds/jobs/**/*.tgz
 .final_builds/packages/**/*.tgz
 .DS_Store
 .idea
 *.swp
-*~
-*#
-#*
+
+# tools
+/src/golang.org/x/tools/
+/src/github.com/square/certstrap
+/src/github.com/client9/misspell
+/src/github.com/mdempsky/unconvert
+/src/github.com/tsenart/deadcode
+/src/github.com/golang/lint
+/src/github.com/opennota/check
+/src/github.com/kisielk/errcheck
+/src/github.com/gordonklaus/ineffassign
+/src/github.com/mvdan/interfacer
+/src/github.com/mvdan/lint
+/src/honnef.co/go
+
+# misc
+out/
+release/
+*/bin
+*.iml
+*.pem
