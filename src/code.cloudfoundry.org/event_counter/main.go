@@ -52,6 +52,10 @@ func main() {
 		missing = append(missing, "subscription-id")
 	}
 
+	if *counterOrigin == "" {
+		missing = append(missing, "counter-origin")
+	}
+
 	if *jobName == "" {
 		missing = append(missing, "job-name")
 	}

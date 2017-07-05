@@ -1,0 +1,25 @@
+---
+name: event_counter
+
+templates:
+  event_counter_ctl.erb: bin/event_counter_ctl
+
+packages:
+- event_counter
+
+properties:
+  event_counter.loggregator_egress_url:
+    description: "Websocket URL for Loggregator egress."
+  event_counter.datadog_api_key:
+    description: "Datadog API key."
+  event_counter.counter_origin:
+    description: "Count only metrics from exactly this origin."
+  event_counter.subscription_id:
+    description: "The firehose subscription ID"
+    default: "capacity-planning"
+  event_counter.uaa_addr:
+    description: "The URL for UAA"
+  event_counter.client_id:
+    description: "ID of client used for authentication."
+  event_counter.client_secret:
+    description: "Secret used for authentication."

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/event_counter
+LOG_DIR=/var/vcap/sys/log/event_counter
+PIDFILE=${RUN_DIR}/event_counter.pid
+JOB_DIR=/var/vcap/jobs/event_counter
+CERT_DIR=$JOB_DIR/config/certs
+
+PACKAGE_DIR=/var/vcap/packages/event_counter
+
+case $1 in
+
+start)
+mkdir -p $RUN_DIR $LOG_DIR
+chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+cd $PACKAGE_DIR
+
+ulimit -n 8192
+
+echo $$ > $PIDFILE
+exec chpst -u vcap:vcap ./event_counter \
+    --loggregator-egress-url=<%= p('event_counter.loggregator_egress_url') %> \
+    --datadog-api-key=<%= p('event_counter.datadog_api_key') %> \
+    --subscription-id=<%= p('event_counter.subscription_id') %> \
+    --counter-origin=<%= p('event_counter.counter_origin') %> \
+    --job-name=<%= spec.job.name || name %> \
+    --instance-id=<%= spec.id || spec.index.to_s %> \
+    --uaa-addr=<%= p('event_counter.uaa_addr') %> \
+    --client-id=<%= p('event_counter.client_id') %> \
+    --client-secret=<%= p('event_counter.client_secret') %> \
+  &>> ${LOG_DIR}/event_counter.log
+
+;;
+
+stop)
+
+killall -9 event_counter
+rm -f $PIDFILE
+
+;;
+
+*)
+echo "Usage: ctl {start|stop}" ;;
+
+esac
