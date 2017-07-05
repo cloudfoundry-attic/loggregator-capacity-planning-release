@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/eventcounter/internal/authenticator"
-	"code.cloudfoundry.org/eventcounter/internal/reader"
-	"code.cloudfoundry.org/eventcounter/internal/reporter"
+	"code.cloudfoundry.org/event_counter/internal/authenticator"
+	"code.cloudfoundry.org/event_counter/internal/reader"
+	"code.cloudfoundry.org/event_counter/internal/reporter"
 )
 
 var (

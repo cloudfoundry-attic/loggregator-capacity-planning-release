@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	"code.cloudfoundry.org/eventcounter/internal/reader"
+	"code.cloudfoundry.org/event_counter/internal/reader"
 )
 
 const datadogAddr = "https://app.datadoghq.com/api/v1/series"

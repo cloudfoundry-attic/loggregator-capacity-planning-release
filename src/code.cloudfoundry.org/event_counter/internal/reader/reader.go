@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"code.cloudfoundry.org/event_counter/internal/authenticator"
+
 	"github.com/cloudfoundry/noaa/consumer"
 	"github.com/cloudfoundry/sonde-go/events"
-
-	"code.cloudfoundry.org/eventcounter/internal/authenticator"
 )
 
 type Reader struct {
