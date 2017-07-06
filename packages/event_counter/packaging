@@ -7,5 +7,5 @@ export GOPATH=$PWD
 ln -s $GOPATH $GOPATH/src
 
 go install code.cloudfoundry.org/event_counter
-cp -a $PWD/loggregator-capacity-planning-release/bin/event_counter ${BOSH_INSTALL_TARGET}
+cp -a $GOPATH/bin/event_counter ${BOSH_INSTALL_TARGET}
 
