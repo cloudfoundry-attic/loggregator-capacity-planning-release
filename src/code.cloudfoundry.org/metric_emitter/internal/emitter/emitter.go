@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/cloudfoundry/dropsonde"
+
 	loggregator "code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/v1"
 )
@@ -32,9 +34,8 @@ func New(
 	var err error
 	switch apiVersion {
 	case "v1":
-		client, err = v1.NewClient(
-			v1.WithStringTag("origin", origin),
-		)
+		dropsonde.Initialize("localhost:3457", origin)
+		client, err = v1.NewClient()
 		if err != nil {
 			log.Fatalf("failed to create v1 client: %s", err)
 		}
