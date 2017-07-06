@@ -8,13 +8,16 @@ stemcells:
 releases:
 - name: loggregator-capacity-planning
   version: latest
+- name: loggregator
+  version: latest
+- name: consul
+  version: latest
 
 instance_groups:
 - name: event_counter
   azs:
   - z1
   instances: 1
-  persistent_disk_type: 1GB
   vm_type: default
   stemcell: default
   networks:
@@ -26,10 +29,77 @@ instance_groups:
       event_counter:
         loggregator_egress_url: "wss://doppler.((system_domain)):443"
         datadog_api_key: "((datadog_api_key))"
-        counter_origin: "metricemitter"
+        counter_origin: "capacity-planning.metric-emitter"
         uaa_addr: "https://uaa.((system_domain))"
         client_id: "((client_id))"
         client_secret: "((client_secret))"
+
+- name: metric_emitter
+  azs:
+  - z1
+  instances: 1
+  vm_type: default
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: nil
+      consul_common: {from: consul_common_link, deployment: cf}
+      consul_server: {from: consul_server_link, deployment: cf}
+      consul_client: {from: consul_client_link, deployment: cf}
+  - name: metric_emitter
+    release: loggregator-capacity-planning
+    properties:
+      metric_emitter:
+        api_version: "v2"
+        datadog_api_key: "((datadog_api_key))"
+        metrics_per_second: 1000
+        origin: "capacity-planning.metric-emitter"
+        tls:
+          ca: "((metric_emitter_tls.ca))"
+          cert: "((metric_emitter_tls.certificate))"
+          key: "((metric_emitter_tls.private_key))"
+  - name: metron_agent
+    release: loggregator
+    properties:
+      metron_agent:
+        deployment: "((system_domain))"
+      metron_endpoint:
+        shared_secret: "((dropsonde_shared_secret))"
+      loggregator:
+        tls:
+          ca_cert: "((loggregator_tls_metron.ca))"
+          metron:
+            cert: "((loggregator_tls_metron.certificate))"
+            key: "((loggregator_tls_metron.private_key))"
+
+variables:
+- name: loggregator_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: CA
+- name: metric_emitter_tls
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: metric_emitter
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: loggregator_tls_metron
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: metron
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: dropsonde_shared_secret
+  type: password
 
 update:
   canaries: 10
