@@ -1,0 +1,31 @@
+---
+name: metric_emitter
+
+templates:
+  metric_emitter_ctl.erb: bin/metric_emitter_ctl
+  ca.crt.erb: config/certs/ca.crt
+  client.crt.erb: config/certs/client.crt
+  client.key.erb: config/certs/client.key
+
+packages:
+- metric_emitter
+
+properties:
+  metric_emitter.api_version:
+    description: "Version of the loggregator ingress API to emit envelopes to. ('v1' or 'v2')"
+  metric_emitter.datadog_api_key:
+    description: "Datadog API key."
+  metric_emitter.metrics_per_second:
+    description: "Number of metrics to emit each second."
+    default: 1000
+  metric_emitter.origin:
+    description: "Origin to set on all emitted envlopes."
+  metric_emitter.tls.ca:
+    description: "Certificate Authority certificate."
+    default: ""
+  metric_emitter.tls.cert:
+    description: "Client certificate for communicating with metron."
+    default: ""
+  metric_emitter.tls.key:
+    description: "Client private key for communicating with metron."
+    default: ""

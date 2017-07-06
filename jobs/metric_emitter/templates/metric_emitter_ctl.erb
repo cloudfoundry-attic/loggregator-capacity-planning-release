@@ -1,0 +1,46 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/metric_emitter
+LOG_DIR=/var/vcap/sys/log/metric_emitter
+PIDFILE=${RUN_DIR}/metric_emitter.pid
+JOB_DIR=/var/vcap/jobs/metric_emitter
+CERT_DIR=$JOB_DIR/config/certs
+
+PACKAGE_DIR=/var/vcap/packages/metric_emitter
+
+case $1 in
+
+start)
+mkdir -p $RUN_DIR $LOG_DIR
+chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+cd $PACKAGE_DIR
+
+ulimit -n 8192
+
+echo $$ > $PIDFILE
+exec chpst -u vcap:vcap ./metric_emitter \
+    --api-version="<%= p('metric_emitter.api_version') %>" \
+    --datadog-api-key="<%= p('metric_emitter.datadog_api_key') %>" \
+    --instance-id="<%= spec.id || spec.index.to_s %>" \
+    --job-name="<%= spec.job.name || name %>" \
+    --metrics-per-second="<%= p('metric_emitter.metrics_per_second') %>" \
+    --origin="<%= p('metric_emitter.origin') %>" \
+    --ca-path="$CERT_DIR/ca.crt" \
+    --cert-path="$CERT_DIR/client.crt" \
+    --key-path="$CERT_DIR/client.key" \
+  &>> ${LOG_DIR}/metric_emitter.log
+
+;;
+
+stop)
+
+killall -9 metric_emitter
+rm -f $PIDFILE
+
+;;
+
+*)
+echo "Usage: ctl {start|stop}" ;;
+
+esac

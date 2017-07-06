@@ -31,6 +31,7 @@ function sync_package() {
   )
 }
 
-sync_package event_counter -app  code.cloudfoundry.org/event_counter &
+sync_package event_counter  -app  code.cloudfoundry.org/event_counter &
+sync_package metric_emitter -app  code.cloudfoundry.org/metric_emitter &
 
 wait

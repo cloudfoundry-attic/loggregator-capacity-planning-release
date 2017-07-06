@@ -1,0 +1,5 @@
+check process metric_emitter
+  with pidfile /var/vcap/sys/run/metric_emitter/metric_emitter.pid
+  start program "/var/vcap/jobs/metric_emitter/bin/metric_emitter_ctl start"
+  stop program "/var/vcap/jobs/metric_emitter/bin/metric_emitter_ctl stop"
+  group vcap
