@@ -31,5 +31,9 @@ instance_groups:
         client_id: "((client_id))"
         client_secret: "((client_secret))"
 
-
-
+update:
+  canaries: 10
+  max_in_flight: 10
+  canary_watch_time: 30000-60000
+  update_watch_time: 5000-60000
+  serial: true
