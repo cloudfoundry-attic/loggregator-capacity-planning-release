@@ -27,7 +27,7 @@ instance_groups:
         loggregator_egress_url: "wss://doppler.((system_domain)):443"
         datadog_api_key: "((datadog_api_key))"
         counter_origin: "metricemitter"
-        loggregator_egress_url: "https://uaa.((system_domain))"
+        uaa_addr: "https://uaa.((system_domain))"
         client_id: "((client_id))"
         client_secret: "((client_secret))"
 
