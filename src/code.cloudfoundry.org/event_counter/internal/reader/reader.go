@@ -63,7 +63,10 @@ func (r *Reader) read(authToken string) {
 
 	msgChan, errChan := cmr.Firehose(r.subscriptionID, authToken)
 
+	done := make(chan struct{})
 	go func() {
+		defer close(done)
+
 		for err := range errChan {
 			if err == nil {
 				return
@@ -73,21 +76,20 @@ func (r *Reader) read(authToken string) {
 		}
 	}()
 
-	for msg := range msgChan {
-		if msg == nil {
+	for {
+		select {
+		case <-done:
 			return
-		}
-
-		if msg.GetEventType() == events.Envelope_LogMessage {
-			atomic.AddInt64(&r.logCount, 1)
-			return
-		}
-
-		if msg.GetEventType() == events.Envelope_CounterEvent {
-			if msg.GetOrigin() == r.counterOrigin {
-				atomic.AddInt64(&r.metricCount, 1)
+		case msg := <-msgChan:
+			if msg.GetEventType() == events.Envelope_LogMessage {
+				atomic.AddInt64(&r.logCount, 1)
 			}
-			return
+
+			if msg.GetEventType() == events.Envelope_CounterEvent {
+				if msg.GetOrigin() == r.counterOrigin {
+					atomic.AddInt64(&r.metricCount, 1)
+				}
+			}
 		}
 	}
 }
