@@ -91,7 +91,7 @@ func (r *Reporter) buildMessageBody(logs, metrics int64) ([]byte, error) {
 			},
 			Type: "gauge",
 			Tags: []string{
-				"logs",
+				"event_type:logs",
 				"job_name:" + r.jobName,
 				"instance_index:" + r.instanceID,
 			},
@@ -103,7 +103,7 @@ func (r *Reporter) buildMessageBody(logs, metrics int64) ([]byte, error) {
 			},
 			Type: "gauge",
 			Tags: []string{
-				"metrics",
+				"event_type:metrics",
 				"job_name:" + r.jobName,
 				"instance_index:" + r.instanceID,
 			},
