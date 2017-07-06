@@ -2,7 +2,9 @@ set -e
 
 export GOROOT=$(readlink -nf /var/vcap/packages/golang1.8.3)
 export PATH=$GOROOT/bin:$PATH
-export GOPATH=$PWD/loggregator-capacity-planning-release
+export GOPATH=$PWD
+
+ln -s $GOPATH $GOPATH/src
 
 go install code.cloudfoundry.org/event_counter
 cp -a $PWD/loggregator-capacity-planning-release/bin/event_counter ${BOSH_INSTALL_TARGET}
