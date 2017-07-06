@@ -38,6 +38,7 @@ func main() {
 	uaaAddr := flag.String("uaa-addr", "", "The URL for UAA")
 	clientID := flag.String("client-id", "", "ID of client used for authentication.")
 	clientSecret := flag.String("client-secret", "", "Secret used for authentication.")
+	flag.Parse()
 
 	var missing []string
 	if *loggregatorEgressURL == "" {

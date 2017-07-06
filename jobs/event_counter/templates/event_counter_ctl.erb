@@ -20,15 +20,15 @@ ulimit -n 8192
 
 echo $$ > $PIDFILE
 exec chpst -u vcap:vcap ./event_counter \
-    --loggregator-egress-url=<%= p('event_counter.loggregator_egress_url') %> \
-    --datadog-api-key=<%= p('event_counter.datadog_api_key') %> \
-    --subscription-id=<%= p('event_counter.subscription_id') %> \
-    --counter-origin=<%= p('event_counter.counter_origin') %> \
-    --job-name=<%= spec.job.name || name %> \
-    --instance-id=<%= spec.id || spec.index.to_s %> \
-    --uaa-addr=<%= p('event_counter.uaa_addr') %> \
-    --client-id=<%= p('event_counter.client_id') %> \
-    --client-secret=<%= p('event_counter.client_secret') %> \
+    --loggregator-egress-url="<%= p('event_counter.loggregator_egress_url') %>" \
+    --datadog-api-key="<%= p('event_counter.datadog_api_key') %>" \
+    --subscription-id="<%= p('event_counter.subscription_id') %>" \
+    --counter-origin="<%= p('event_counter.counter_origin') %>" \
+    --job-name="<%= spec.job.name || name %>" \
+    --instance-id="<%= spec.id || spec.index.to_s %>" \
+    --uaa-addr="<%= p('event_counter.uaa_addr') %>" \
+    --client-id="<%= p('event_counter.client_id') %>" \
+    --client-secret="<%= p('event_counter.client_secret') %>" \
   &>> ${LOG_DIR}/event_counter.log
 
 ;;
