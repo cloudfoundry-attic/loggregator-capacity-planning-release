@@ -25,6 +25,7 @@ type Reporter struct {
 	datadogAPIKey string
 	jobName       string
 	instanceID    string
+	apiVersion    string
 	emitter       *emitter.Emitter
 	httpClient    *http.Client
 }
@@ -33,6 +34,7 @@ func New(
 	datadogAPIKey string,
 	jobName string,
 	instanceID string,
+	apiVersion string,
 	emitter *emitter.Emitter,
 	httpClient *http.Client,
 ) *Reporter {
@@ -40,6 +42,7 @@ func New(
 		datadogAPIKey: datadogAPIKey,
 		jobName:       jobName,
 		instanceID:    instanceID,
+		apiVersion:    apiVersion,
 		emitter:       emitter,
 		httpClient:    httpClient,
 	}
@@ -94,6 +97,7 @@ func (r *Reporter) buildMessageBody(sent int64) ([]byte, error) {
 				"event_type:metrics",
 				"job_name:" + r.jobName,
 				"instance_index:" + r.instanceID,
+				"api_version:" + r.apiVersion,
 			},
 		},
 	}

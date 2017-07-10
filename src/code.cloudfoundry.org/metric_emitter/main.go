@@ -69,6 +69,13 @@ func main() {
 	)
 	go emitter.Run()
 
-	reporter := reporter.New(*datadogAPIKey, *jobName, *instanceID, emitter, httpClient)
+	reporter := reporter.New(
+		*datadogAPIKey,
+		*jobName,
+		*instanceID,
+		*apiVersion,
+		emitter,
+		httpClient,
+	)
 	reporter.Run()
 }
