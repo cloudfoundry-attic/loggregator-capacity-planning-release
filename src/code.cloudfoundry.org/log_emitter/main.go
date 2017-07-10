@@ -156,7 +156,7 @@ func buildMessagesBody(host, appName string, sent, received int64) ([]byte, erro
 
 	metrics := []Metric{
 		{
-			Metric: "capacity_planning.messages_sent",
+			Metric: "capacity_planning.sent",
 			Points: [][]int64{
 				[]int64{currentTime.Unix(), sent},
 			},
@@ -165,13 +165,14 @@ func buildMessagesBody(host, appName string, sent, received int64) ([]byte, erro
 			Tags: []string{
 				appName,
 				"instance_index:" + os.Getenv("INSTANCE_INDEX"),
+				"event_type:logs",
 			},
 		},
 	}
 
 	if reportReadMessages {
 		metrics = append(metrics, Metric{
-			Metric: "capacity_planning.messages_received",
+			Metric: "capacity_planning.received",
 			Points: [][]int64{
 				[]int64{currentTime.Unix(), received},
 			},
@@ -180,6 +181,7 @@ func buildMessagesBody(host, appName string, sent, received int64) ([]byte, erro
 			Tags: []string{
 				appName,
 				"instance_index:" + os.Getenv("INSTANCE_INDEX"),
+				"event_type:logs",
 			},
 		})
 	}
