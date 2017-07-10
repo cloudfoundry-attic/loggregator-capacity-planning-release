@@ -117,7 +117,7 @@ func report(appName, host, datadogAPIKey string) {
 	}
 	dURL.RawQuery = query.Encode()
 
-	ticker := time.NewTicker(5 * time.Minute)
+	ticker := time.NewTicker(time.Minute)
 	for range ticker.C {
 		sent := atomic.SwapInt64(&messagesSent, 0)
 		received := atomic.SwapInt64(&messagesReceived, 0)
