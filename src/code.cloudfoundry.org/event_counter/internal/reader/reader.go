@@ -61,24 +61,15 @@ func (r *Reader) SwapCounts() (logCount int64, metricCount int64) {
 func (r *Reader) read(authToken string) {
 	cmr := consumer.New(r.egressAddr, r.tlsConfig, nil)
 
-	msgChan, errChan := cmr.Firehose(r.subscriptionID, authToken)
-
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-
-		for err := range errChan {
-			if err == nil {
-				return
-			}
-
-			log.Println(err)
-		}
-	}()
+	msgChan, errChan := cmr.FirehoseWithoutReconnect(r.subscriptionID, authToken)
 
 	for {
 		select {
-		case <-done:
+		case err := <-errChan:
+			if err != nil {
+				log.Println(err)
+			}
+
 			return
 		case msg := <-msgChan:
 			if msg.GetEventType() == events.Envelope_LogMessage {
