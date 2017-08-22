@@ -54,7 +54,7 @@ instance_groups:
     release: loggregator-capacity-planning
     properties:
       metric_emitter:
-        api_version: "v2"
+        api_version: "v1"
         datadog_api_key: "((datadog_api_key))"
         metrics_per_second: 1000
         origin: "capacity-planning.metric-emitter"
