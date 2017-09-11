@@ -45,23 +45,23 @@ instance_groups:
   networks:
   - name: default
   jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: nil
+      consul_common: {from: consul_common_link, deployment: cf}
+      consul_server: {from: consul_server_link, deployment: cf}
+      consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            syslog-counter: {}
   - name: syslog_counter
     release: loggregator-capacity-planning
     properties:
       syslog_counter:
         datadog_api_key: "((datadog_api_key))"
-  - name: route_registrar
-    release: routing
-    properties:
-      route_registrar:
-        routes:
-        - name: syslog-counter
-          port: 8080
-          registration_interval: 20s
-          tags:
-            component: syslog-counter
-          uris:
-          - syslog-counter.((system_domain))
 
 - name: metric_emitter
   azs:

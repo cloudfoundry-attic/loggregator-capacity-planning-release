@@ -3,6 +3,7 @@ name: syslog_counter
 
 templates:
   syslog_counter_ctl.erb: bin/syslog_counter_ctl
+  dns_health_check.erb: bin/dns_health_check
 
 packages:
 - syslog_counter
