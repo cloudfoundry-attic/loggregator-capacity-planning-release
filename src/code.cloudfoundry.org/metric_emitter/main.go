@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"code.cloudfoundry.org/datadogreporter"
 	"code.cloudfoundry.org/metric_emitter/internal/emitter"
-	"code.cloudfoundry.org/metric_emitter/internal/reporter"
 )
 
 var (
@@ -69,11 +69,10 @@ func main() {
 	)
 	go emitter.Run()
 
-	reporter := reporter.New(
+	reporter := datadogreporter.New(
 		*datadogAPIKey,
 		*jobName,
 		*instanceID,
-		*apiVersion,
 		emitter,
 		httpClient,
 	)

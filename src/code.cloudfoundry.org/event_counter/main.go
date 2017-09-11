@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"code.cloudfoundry.org/datadogreporter"
 	"code.cloudfoundry.org/event_counter/internal/authenticator"
 	"code.cloudfoundry.org/event_counter/internal/reader"
-	"code.cloudfoundry.org/event_counter/internal/reporter"
 )
 
 var (
@@ -88,7 +88,7 @@ func main() {
 		*counterOrigin,
 		tlsConfig,
 	)
-	reporter := reporter.New(
+	reporter := datadogreporter.New(
 		*datadogAPIKey,
 		*jobName,
 		*instanceID,

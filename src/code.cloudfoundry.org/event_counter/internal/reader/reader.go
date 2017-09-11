@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"code.cloudfoundry.org/datadogreporter"
 	"code.cloudfoundry.org/event_counter/internal/authenticator"
 
 	"github.com/cloudfoundry/noaa/consumer"
@@ -51,11 +52,34 @@ func (r *Reader) Run() {
 	}
 }
 
-func (r *Reader) SwapCounts() (logCount int64, metricCount int64) {
-	logCount = atomic.SwapInt64(&r.logCount, 0)
-	metricCount = atomic.SwapInt64(&r.metricCount, 0)
+func (r *Reader) BuildPoints() []datadogreporter.Point {
+	logs := atomic.SwapInt64(&r.logCount, 0)
+	metrics := atomic.SwapInt64(&r.metricCount, 0)
 
-	return logCount, metricCount
+	currentTime := time.Now().Unix()
+
+	return []datadogreporter.Point{
+		{
+			Metric: "capacity_planning.received",
+			Points: [][]int64{
+				[]int64{currentTime, logs},
+			},
+			Type: "gauge",
+			Tags: []string{
+				"event_type:logs",
+			},
+		},
+		{
+			Metric: "capacity_planning.received",
+			Points: [][]int64{
+				[]int64{currentTime, metrics},
+			},
+			Type: "gauge",
+			Tags: []string{
+				"event_type:metrics",
+			},
+		},
+	}
 }
 
 func (r *Reader) read(authToken string) {

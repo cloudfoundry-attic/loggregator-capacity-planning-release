@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudfoundry/dropsonde"
 
+	"code.cloudfoundry.org/datadogreporter"
 	loggregator "code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/v1"
 )
@@ -20,6 +21,7 @@ type Emitter struct {
 	client           Client
 	metricsPerSecond uint
 	sentCount        int64
+	apiVersion       string
 }
 
 func New(
@@ -58,6 +60,7 @@ func New(
 	return &Emitter{
 		client:           client,
 		metricsPerSecond: metricsPerSecond,
+		apiVersion:       apiVersion,
 	}
 }
 
@@ -77,6 +80,20 @@ func (e *Emitter) Run() {
 	}
 }
 
-func (e *Emitter) SwapCount() int64 {
-	return atomic.SwapInt64(&e.sentCount, 0)
+func (e *Emitter) BuildPoints() []datadogreporter.Point {
+	sent := atomic.SwapInt64(&e.sentCount, 0)
+
+	return []datadogreporter.Point{
+		{
+			Metric: "capacity_planning.sent",
+			Points: [][]int64{
+				[]int64{time.Now().Unix(), sent},
+			},
+			Type: "gauge",
+			Tags: []string{
+				"event_type:metrics",
+				"api_version:" + e.apiVersion,
+			},
+		},
+	}
 }
