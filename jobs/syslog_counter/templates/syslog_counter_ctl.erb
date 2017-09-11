@@ -1,0 +1,41 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/syslog_counter
+LOG_DIR=/var/vcap/sys/log/syslog_counter
+PIDFILE=${RUN_DIR}/syslog_counter.pid
+JOB_DIR=/var/vcap/jobs/syslog_counter
+CERT_DIR=$JOB_DIR/config/certs
+
+PACKAGE_DIR=/var/vcap/packages/syslog_counter
+
+case $1 in
+
+start)
+mkdir -p $RUN_DIR $LOG_DIR
+chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+cd $PACKAGE_DIR
+
+ulimit -n 8192
+
+echo $$ > $PIDFILE
+exec chpst -u vcap:vcap ./syslog_counter \
+    --port="<%= p('syslog_counter.port') %> \
+    --datadog-api-key="<%= p('syslog_counter.datadog_api_key') %>" \
+    --job-name="<%= spec.job.name || name %>" \
+    --instance-id="<%= spec.id || spec.index.to_s %>" \
+  &>> ${LOG_DIR}/syslog_counter.log
+
+;;
+
+stop)
+
+killall -9 syslog_counter
+rm -f $PIDFILE
+
+;;
+
+*)
+echo "Usage: ctl {start|stop}" ;;
+
+esac

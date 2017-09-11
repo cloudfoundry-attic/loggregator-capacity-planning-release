@@ -1,0 +1,5 @@
+check process syslog_counter
+  with pidfile /var/vcap/sys/run/syslog_counter/syslog_counter.pid
+  start program "/var/vcap/jobs/syslog_counter/bin/syslog_counter_ctl start"
+  stop program "/var/vcap/jobs/syslog_counter/bin/syslog_counter_ctl stop"
+  group vcap

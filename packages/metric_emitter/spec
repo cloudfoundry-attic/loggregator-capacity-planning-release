@@ -5,6 +5,7 @@ dependencies:
 - golang1.8.3
 
 files:
+- code.cloudfoundry.org/datadogreporter/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/v1/*.go # gosub
@@ -26,7 +27,6 @@ files:
 - code.cloudfoundry.org/go-loggregator/vendor/google.golang.org/grpc/transport/*.go # gosub
 - code.cloudfoundry.org/metric_emitter/*.go # gosub
 - code.cloudfoundry.org/metric_emitter/internal/emitter/*.go # gosub
-- code.cloudfoundry.org/metric_emitter/internal/reporter/*.go # gosub
 - github.com/cloudfoundry/dropsonde/*.go # gosub
 - github.com/cloudfoundry/dropsonde/emitter/*.go # gosub
 - github.com/cloudfoundry/dropsonde/envelope_sender/*.go # gosub

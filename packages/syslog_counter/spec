@@ -1,0 +1,11 @@
+---
+name: syslog_counter
+
+dependencies:
+- golang1.8.3
+
+files:
+- code.cloudfoundry.org/datadogreporter/*.go # gosub
+- code.cloudfoundry.org/rfc5424/*.go # gosub
+- code.cloudfoundry.org/syslog_counter/*.go # gosub
+- code.cloudfoundry.org/syslog_counter/internal/sysloglistener/*.go # gosub

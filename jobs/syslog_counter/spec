@@ -1,0 +1,15 @@
+---
+name: syslog_counter
+
+templates:
+  syslog_counter_ctl.erb: bin/syslog_counter_ctl
+
+packages:
+- syslog_counter
+
+properties:
+  syslog_counter.port:
+    description: "Port to receive syslog connections on"
+    default: 8080
+  syslog_counter.datadog_api_key:
+    description: "Datadog API key."

@@ -5,10 +5,10 @@ dependencies:
 - golang1.8.3
 
 files:
+- code.cloudfoundry.org/datadogreporter/*.go # gosub
 - code.cloudfoundry.org/event_counter/*.go # gosub
 - code.cloudfoundry.org/event_counter/internal/authenticator/*.go # gosub
 - code.cloudfoundry.org/event_counter/internal/reader/*.go # gosub
-- code.cloudfoundry.org/event_counter/internal/reporter/*.go # gosub
 - github.com/cloudfoundry/noaa/*.go # gosub
 - github.com/cloudfoundry/noaa/consumer/*.go # gosub
 - github.com/cloudfoundry/noaa/consumer/internal/*.go # gosub
