@@ -12,6 +12,8 @@ releases:
   version: latest
 - name: consul
   version: latest
+- name: routing
+  version: latest
 
 instance_groups:
 - name: event_counter
@@ -33,6 +35,33 @@ instance_groups:
         uaa_addr: "https://uaa.((system_domain))"
         client_id: "((client_id))"
         client_secret: "((client_secret))"
+
+- name: syslog_counter
+  azs:
+  - z1
+  instances: 1
+  vm_type: default
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: syslog_counter
+    release: loggregator-capacity-planning
+    properties:
+      syslog_counter:
+        datadog_api_key: "((datadog_api_key))"
+  - name: route_registrar
+    release: routing
+    properties:
+      route_registrar:
+        routes:
+        - name: syslog-counter
+          port: 8080
+          registration_interval: 20s
+          tags:
+            component: syslog-counter
+          uris:
+          - syslog-counter.((system_domain))
 
 - name: metric_emitter
   azs:
