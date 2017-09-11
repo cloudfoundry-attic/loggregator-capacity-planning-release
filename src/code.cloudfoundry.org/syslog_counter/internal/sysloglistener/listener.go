@@ -60,7 +60,7 @@ func (sl *SyslogListener) handle(conn net.Conn) {
 }
 
 func (sl *SyslogListener) BuildPoints() []datadogreporter.Point {
-	count := atomic.LoadInt64(&sl.logCount)
+	count := atomic.SwapInt64(&sl.logCount, 0)
 
 	return []datadogreporter.Point{
 		{
