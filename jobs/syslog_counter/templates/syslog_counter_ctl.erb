@@ -20,7 +20,7 @@ ulimit -n 8192
 
 echo $$ > $PIDFILE
 exec chpst -u vcap:vcap ./syslog_counter \
-    --port="<%= p('syslog_counter.port') %> \
+    --port="<%= p('syslog_counter.port') %>" \
     --datadog-api-key="<%= p('syslog_counter.datadog_api_key') %>" \
     --job-name="<%= spec.job.name || name %>" \
     --instance-id="<%= spec.id || spec.index.to_s %>" \
