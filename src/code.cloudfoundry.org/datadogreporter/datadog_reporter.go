@@ -63,7 +63,7 @@ func (r *DatadogReporter) Run() {
 			continue
 		}
 
-		log.Printf("Sending point to datadog: %s", data)
+		log.Printf("Sending point to datadog: %s", body)
 
 		response, err := r.httpClient.Post(dURL.String(), "application/json", body)
 		if err != nil {
@@ -71,12 +71,12 @@ func (r *DatadogReporter) Run() {
 			continue
 		}
 
-		body, _ := ioutil.ReadAll(response.Body)
+		respBody, _ := ioutil.ReadAll(response.Body)
 		response.Body.Close()
 
 		if response.StatusCode > 299 || response.StatusCode < 200 {
 			log.Printf("Expected successful status code from Datadog, got %d", response.StatusCode)
-			log.Printf("Response: %s", body)
+			log.Printf("Response: %s", respBody)
 			continue
 		}
 	}
