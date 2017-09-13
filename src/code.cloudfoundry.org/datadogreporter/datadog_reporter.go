@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -62,14 +63,20 @@ func (r *DatadogReporter) Run() {
 			continue
 		}
 
+		log.Printf("Sending point to datadog: %s", data)
+
 		response, err := r.httpClient.Post(dURL.String(), "application/json", body)
 		if err != nil {
 			log.Printf("failed to post to datadog: %s", err)
 			continue
 		}
 
+		body, _ := ioutil.ReadAll(response.Body)
+		response.Body.Close()
+
 		if response.StatusCode > 299 || response.StatusCode < 200 {
 			log.Printf("Expected successful status code from Datadog, got %d", response.StatusCode)
+			log.Printf("Response: %s", body)
 			continue
 		}
 	}

@@ -18,7 +18,7 @@ type SyslogListener struct {
 }
 
 func New(port string) *SyslogListener {
-	return &SyslogListener{}
+	return &SyslogListener{port: port}
 }
 
 func (sl *SyslogListener) Run() {
@@ -27,7 +27,7 @@ func (sl *SyslogListener) Run() {
 		log.Fatal(err)
 	}
 	defer l.Close()
-	log.Print("Listening on " + sl.port)
+	log.Printf("Listening on %s", sl.port)
 
 	for {
 		conn, err := l.Accept()

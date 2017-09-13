@@ -11,9 +11,7 @@ import (
 )
 
 var (
-	tlsConfig *tls.Config = &tls.Config{
-		InsecureSkipVerify: true,
-	}
+	tlsConfig *tls.Config = &tls.Config{}
 
 	httpClient *http.Client = &http.Client{
 		Timeout: 30 * time.Second,
