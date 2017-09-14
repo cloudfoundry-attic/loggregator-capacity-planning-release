@@ -3,7 +3,9 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"code.cloudfoundry.org/datadogreporter"
@@ -43,6 +45,10 @@ func main() {
 
 	if *instanceID == "" {
 		missing = append(missing, "instance-id")
+	}
+
+	if len(missing) > 0 {
+		log.Fatalf("missing required flags: %s", strings.Join(missing, ", "))
 	}
 
 	lis := sysloglistener.New(*port)
