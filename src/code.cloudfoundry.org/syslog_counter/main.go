@@ -1,27 +1,12 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"log"
-	"net/http"
 	"strings"
-	"time"
 
 	"code.cloudfoundry.org/datadogreporter"
 	"code.cloudfoundry.org/syslog_counter/internal/sysloglistener"
-)
-
-var (
-	tlsConfig *tls.Config = &tls.Config{}
-
-	httpClient *http.Client = &http.Client{
-		Timeout: 30 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig:   tlsConfig,
-			DisableKeepAlives: true,
-		},
-	}
 )
 
 func main() {
@@ -62,7 +47,6 @@ func main() {
 		*jobName,
 		*instanceID,
 		lis,
-		httpClient,
 	)
 	reporter.Run()
 }

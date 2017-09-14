@@ -2,6 +2,7 @@ package datadogreporter
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -27,9 +28,16 @@ func New(
 	jobName string,
 	instanceID string,
 	pointBuilder pointBuilder,
-	httpClient httpClient,
 	opts ...reporterOpt,
 ) *DatadogReporter {
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig:   &tls.Config{},
+			DisableKeepAlives: true,
+		},
+	}
+
 	r := &DatadogReporter{
 		apiKey:       apiKey,
 		jobName:      jobName,
@@ -70,11 +78,11 @@ func (r *DatadogReporter) Run() {
 			log.Printf("failed to post to datadog: %s", err)
 			continue
 		}
-
-		respBody, _ := ioutil.ReadAll(response.Body)
-		response.Body.Close()
+		defer response.Body.Close()
 
 		if response.StatusCode > 299 || response.StatusCode < 200 {
+			respBody, _ := ioutil.ReadAll(response.Body)
+
 			log.Printf("Expected successful status code from Datadog, got %d", response.StatusCode)
 			log.Printf("Response: %s", respBody)
 			continue
@@ -121,5 +129,11 @@ type reporterOpt func(*DatadogReporter)
 func WithInterval(d time.Duration) reporterOpt {
 	return func(r *DatadogReporter) {
 		r.interval = d
+	}
+}
+
+func WithHTTPClient(c httpClient) reporterOpt {
+	return func(r *DatadogReporter) {
+		r.httpClient = c
 	}
 }

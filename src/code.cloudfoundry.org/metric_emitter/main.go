@@ -74,7 +74,6 @@ func main() {
 		*jobName,
 		*instanceID,
 		emitter,
-		httpClient,
 	)
 	reporter.Run()
 }

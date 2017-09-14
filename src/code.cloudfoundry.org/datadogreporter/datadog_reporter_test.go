@@ -23,8 +23,9 @@ var _ = Describe("DatadogReporter", func() {
 			"job-name",
 			"instance-id",
 			pointBuilder,
-			httpClient,
-			datadogreporter.WithInterval(10*time.Millisecond))
+			datadogreporter.WithInterval(10*time.Millisecond),
+			datadogreporter.WithHTTPClient(httpClient),
+		)
 		go reporter.Run()
 
 		Eventually(pointBuilder.buildCalled).Should(BeNumerically(">", 1))
@@ -106,6 +107,16 @@ func (s *spyPointBuilder) buildCalled() int {
 	return s._buildCalled
 }
 
+type spyReadCloser struct{}
+
+func (s *spyReadCloser) Close() error {
+	return nil
+}
+
+func (s *spyReadCloser) Read([]byte) (int, error) {
+	return 0, nil
+}
+
 type spyHTTPClient struct {
 	mu           sync.Mutex
 	_postCount   int
@@ -127,7 +138,7 @@ func (s *spyHTTPClient) Post(url string, contentType string, r io.Reader) (*http
 	s._contentType = contentType
 	s._body = string(body)
 
-	return &http.Response{StatusCode: 201}, nil
+	return &http.Response{StatusCode: 201, Body: &spyReadCloser{}}, nil
 }
 
 func (s *spyHTTPClient) url() string {

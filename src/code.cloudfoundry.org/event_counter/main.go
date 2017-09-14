@@ -93,7 +93,6 @@ func main() {
 		*jobName,
 		*instanceID,
 		reader,
-		httpClient,
 	)
 
 	go reader.Run()
