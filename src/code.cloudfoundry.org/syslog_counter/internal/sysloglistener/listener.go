@@ -64,7 +64,7 @@ func (sl *SyslogListener) BuildPoints() []datadogreporter.Point {
 
 	return []datadogreporter.Point{
 		{
-			Metric: "capacity_planning.syslog-drain-received",
+			Metric: "capacity_planning.syslog_drain_received",
 			Points: [][]int64{
 				[]int64{time.Now().Unix(), count},
 			},
