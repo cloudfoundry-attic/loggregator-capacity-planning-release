@@ -56,7 +56,7 @@ instance_groups:
       consul:
         agent:
           services:
-            syslog-counter: {}
+            syslog_counter: {}
   - name: syslog_counter
     release: loggregator-capacity-planning
     properties:
