@@ -46,7 +46,7 @@ instance_groups:
   - name: haproxy
     release: haproxy
     consumes:
-      syslog_counter: {as: tcp_backend}
+      tcp_backend: {from: syslog_counter}
     properties:
       ha_proxy:
         tcp_link_port: 8080
