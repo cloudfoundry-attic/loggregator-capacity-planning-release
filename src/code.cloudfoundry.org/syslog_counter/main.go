@@ -30,6 +30,8 @@ func main() {
 	jobName := flag.String("job-name", "", "Name of the bosh job")
 	instanceID := flag.String("instance-id", "", "Bosh job instance ID")
 
+	flag.Parse()
+
 	var missing []string
 	if *port == "" {
 		missing = append(missing, "port")
