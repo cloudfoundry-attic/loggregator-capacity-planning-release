@@ -14,8 +14,43 @@ releases:
   version: latest
 - name: routing
   version: latest
+- name: haproxy
+  version: 8.4.1
+  url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v8.4.1/haproxy-8.4.1.tgz
+  sha1: 3b860b9a12ac94ea9e9f9f6ad7ec7b58becd0e7a
 
 instance_groups:
+- name: haproxy
+  azs: [z1]
+  instances: 1
+  vm_type: default
+  stemcell: default
+  networks: [{name: default}]
+  jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: nil
+      consul_common: {from: consul_common_link, deployment: cf}
+      consul_server: {from: consul_server_link, deployment: cf}
+      consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            syslog_counter:
+              check:
+                name: always_on_health_check
+                script: /bin/ls
+                interval: 60s
+  - name: haproxy
+    release: haproxy
+    consumes:
+      syslog_counter: {as: tcp_backend}
+    properties:
+      ha_proxy:
+        tcp_link_port: 8080
+
 - name: event_counter
   azs:
   - z1
@@ -45,18 +80,6 @@ instance_groups:
   networks:
   - name: default
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul: nil
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: {from: consul_server_link, deployment: cf}
-      consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            syslog_counter: {}
   - name: syslog_counter
     release: loggregator-capacity-planning
     properties:

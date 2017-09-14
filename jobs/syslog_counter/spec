@@ -8,6 +8,10 @@ templates:
 packages:
 - syslog_counter
 
+provides:
+- name: syslog_counter
+  type: ssh_proxy
+
 properties:
   syslog_counter.port:
     description: "Port to receive syslog connections on"
