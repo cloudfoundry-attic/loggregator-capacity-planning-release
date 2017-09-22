@@ -23,6 +23,7 @@ var _ = Describe("DatadogReporter", func() {
 			"job-name",
 			"instance-id",
 			pointBuilder,
+			datadogreporter.WithHost("abcdefg"),
 			datadogreporter.WithInterval(10*time.Millisecond),
 			datadogreporter.WithHTTPClient(httpClient),
 		)
@@ -38,7 +39,7 @@ var _ = Describe("DatadogReporter", func() {
 					"metric": "capacity_planning.sent",
 					"points": [[1234, 4321]],
 					"type": "gauge",
-					"host": "",
+					"host": "abcdefg",
 					"tags": [
 						"event_type:metrics",
 						"api_version:2",
@@ -50,7 +51,7 @@ var _ = Describe("DatadogReporter", func() {
 					"metric": "capacity_planning.read",
 					"points": [[1234, 4321]],
 					"type": "gauge",
-					"host": "",
+					"host": "abcdefg",
 					"tags": [
 						"event_type:metrics",
 						"api_version:2",

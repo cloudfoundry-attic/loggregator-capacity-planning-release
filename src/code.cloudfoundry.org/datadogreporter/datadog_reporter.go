@@ -18,6 +18,7 @@ type DatadogReporter struct {
 	apiKey       string
 	jobName      string
 	instanceID   string
+	host         string
 	pointBuilder pointBuilder
 	httpClient   httpClient
 	interval     time.Duration
@@ -94,6 +95,7 @@ func (r *DatadogReporter) buildRequestBody() (io.Reader, error) {
 	points := r.pointBuilder.BuildPoints()
 
 	for i, p := range points {
+		p.Host = r.host
 		p.Tags = append(p.Tags, "job_name:"+r.jobName)
 		p.Tags = append(p.Tags, "instance_index:"+r.instanceID)
 
@@ -126,14 +128,20 @@ type httpClient interface {
 
 type reporterOpt func(*DatadogReporter)
 
-func WithInterval(d time.Duration) reporterOpt {
+func WithHost(host string) reporterOpt {
 	return func(r *DatadogReporter) {
-		r.interval = d
+		r.host = host
 	}
 }
 
 func WithHTTPClient(c httpClient) reporterOpt {
 	return func(r *DatadogReporter) {
 		r.httpClient = c
+	}
+}
+
+func WithInterval(d time.Duration) reporterOpt {
+	return func(r *DatadogReporter) {
+		r.interval = d
 	}
 }
