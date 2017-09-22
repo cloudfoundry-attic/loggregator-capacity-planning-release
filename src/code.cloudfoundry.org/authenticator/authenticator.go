@@ -1,36 +1,52 @@
 package authenticator
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type Authenticator struct {
 	clientID     string
 	clientSecret string
 	uaaAddr      string
-	httpClient   *http.Client
+	httpClient   httpClient
 }
 
-func New(id, secret, uaaAddr string, c *http.Client) *Authenticator {
-	return &Authenticator{
+func New(id, secret, uaaAddr string, opts ...authenticatorOpt) *Authenticator {
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig:   &tls.Config{},
+			DisableKeepAlives: true,
+		},
+	}
+
+	a := &Authenticator{
 		clientID:     id,
 		clientSecret: secret,
 		uaaAddr:      uaaAddr,
-		httpClient:   c,
+		httpClient:   httpClient,
 	}
+
+	for _, o := range opts {
+		o(a)
+	}
+
+	return a
 }
 
 func (a *Authenticator) Token() (string, error) {
 	response, err := a.httpClient.PostForm(a.uaaAddr+"/oauth/token", url.Values{
-		"response_type": []string{"token"},
-		"grant_type":    []string{"client_credentials"},
-		"client_id":     []string{a.clientID},
-		"client_secret": []string{a.clientSecret},
+		"response_type": {"token"},
+		"grant_type":    {"client_credentials"},
+		"client_id":     {a.clientID},
+		"client_secret": {a.clientSecret},
 	})
 	if err != nil {
 		return "", err
@@ -62,4 +78,16 @@ func (a *Authenticator) Token() (string, error) {
 	}
 
 	return "bearer " + accessToken, nil
+}
+
+type httpClient interface {
+	PostForm(string, url.Values) (*http.Response, error)
+}
+
+type authenticatorOpt func(*Authenticator)
+
+func WithHTTPClient(c httpClient) authenticatorOpt {
+	return func(a *Authenticator) {
+		a.httpClient = c
+	}
 }

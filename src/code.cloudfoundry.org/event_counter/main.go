@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"code.cloudfoundry.org/authenticator"
 	"code.cloudfoundry.org/datadogreporter"
-	"code.cloudfoundry.org/event_counter/internal/authenticator"
 	"code.cloudfoundry.org/event_counter/internal/reader"
 )
 
@@ -81,13 +81,21 @@ func main() {
 		log.Fatalf("missing required flags: %s", strings.Join(missing, ", "))
 	}
 
+	auth := authenticator.New(
+		*clientID,
+		*clientSecret,
+		*uaaAddr,
+		authenticator.WithHTTPClient(httpClient),
+	)
+
 	reader := reader.New(
-		authenticator.New(*clientID, *clientSecret, *uaaAddr, httpClient),
+		auth,
 		*loggregatorEgressURL,
 		*subscriptionID,
 		*counterOrigin,
 		tlsConfig,
 	)
+
 	reporter := datadogreporter.New(
 		*datadogAPIKey,
 		*jobName,

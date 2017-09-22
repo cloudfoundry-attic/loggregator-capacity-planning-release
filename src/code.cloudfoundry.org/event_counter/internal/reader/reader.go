@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"code.cloudfoundry.org/authenticator"
 	"code.cloudfoundry.org/datadogreporter"
-	"code.cloudfoundry.org/event_counter/internal/authenticator"
 
 	"github.com/cloudfoundry/noaa/consumer"
 	"github.com/cloudfoundry/sonde-go/events"
