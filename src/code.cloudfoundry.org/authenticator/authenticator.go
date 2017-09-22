@@ -22,7 +22,9 @@ func New(id, secret, uaaAddr string, opts ...authenticatorOpt) *Authenticator {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
 		Transport: &http.Transport{
-			TLSClientConfig:   &tls.Config{},
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
 			DisableKeepAlives: true,
 		},
 	}

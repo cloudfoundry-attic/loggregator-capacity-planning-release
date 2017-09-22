@@ -1,22 +1,20 @@
 package main
 
 import (
-	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
-	"sync/atomic"
 	"time"
 
-	"github.com/cloudfoundry/noaa/consumer"
-	"github.com/cloudfoundry/sonde-go/events"
+	"code.cloudfoundry.org/authenticator"
+	"code.cloudfoundry.org/datadogreporter"
+	"code.cloudfoundry.org/log_emitter/internal/reader"
+	"code.cloudfoundry.org/log_emitter/internal/writer"
 )
 
 var (
@@ -66,35 +64,84 @@ func main() {
 	flag.StringVar(&authInfo.ClientSecret, "client-secret", "", "Secret used for authentication.")
 
 	flag.Parse()
-
 	vcapApp := loadVCAP()
-	reportReadMessages = os.Getenv("INSTANCE_INDEX") == "0"
+
+	for i := uint(0); i < *logSize; i++ {
+		logMessage += "?"
+	}
+
+	var r *reader.Reader
+	instanceID := os.Getenv("INSTANCE_INDEX")
+	reportReadMessages = instanceID == "0"
 	if reportReadMessages {
 		v2Info, err := getV2Info(vcapApp.APIAddr)
 		if err != nil {
 			log.Fatalf("failed to get API info: %s", err)
 		}
 
-		go readLogsLoop(vcapApp, v2Info, authInfo)
+		auth := authenticator.New(
+			authInfo.ClientID,
+			authInfo.ClientSecret,
+			v2Info.UAAAddr,
+		)
+
+		r = reader.New(
+			v2Info.DopplerAddr,
+			vcapApp.AppID,
+			logMessage,
+			auth,
+		)
+
+		go r.Run()
 	}
 
-	go report(vcapApp.AppName, vcapApp.APIAddr, *datadogAPIKey)
+	w := writer.New(logMessage, *logsPerSecond)
+	go w.Run()
 
-	for i := uint(0); i < *logSize; i++ {
-		logMessage += "?"
-	}
-
-	emitLogs(*logsPerSecond)
+	reporter := datadogreporter.New(
+		*datadogAPIKey,
+		vcapApp.AppName,
+		instanceID,
+		NewReportWrapper(vcapApp.AppName, r, w),
+		datadogreporter.WithHost(vcapApp.APIAddr),
+	)
+	reporter.Run()
 }
 
-func emitLogs(logsPerSecond uint) {
-	interval := time.Second / time.Duration(logsPerSecond)
-	for {
-		startTime := time.Now()
-		emitLog()
-		timeToSleep := interval - time.Since(startTime)
-		time.Sleep(timeToSleep)
+type ReporterWrapper struct {
+	appName string
+	reader  *reader.Reader
+	writer  *writer.Writer
+}
+
+func NewReportWrapper(appName string, r *reader.Reader, w *writer.Writer) *ReporterWrapper {
+	return &ReporterWrapper{appName: appName, reader: r, writer: w}
+}
+
+func (rw *ReporterWrapper) BuildPoints() []datadogreporter.Point {
+	currentTime := time.Now().Unix()
+
+	writeCount := rw.writer.Count()
+	points := []datadogreporter.Point{
+		{
+			Metric: "capacity_planning.sent",
+			Points: [][]int64{{currentTime, writeCount}},
+			Type:   "gauge",
+			Tags:   []string{rw.appName, "event_type:logs"},
+		},
 	}
+
+	if rw.reader != nil {
+		readCount := rw.reader.Count()
+		points = append(points, datadogreporter.Point{
+			Metric: "capacity_planning.received",
+			Points: [][]int64{{currentTime, readCount}},
+			Type:   "gauge",
+			Tags:   []string{rw.appName, "event_type:logs"},
+		})
+	}
+
+	return points
 }
 
 func loadVCAP() *VCAPApplication {
@@ -105,176 +152,6 @@ func loadVCAP() *VCAPApplication {
 	}
 
 	return &vcapApp
-}
-
-func report(appName, host, datadogAPIKey string) {
-	dURL, err := url.Parse(datadogAddr)
-	if err != nil {
-		log.Fatalf("Failed to parse datadog URL: %s", err)
-	}
-	query := url.Values{
-		"api_key": []string{datadogAPIKey},
-	}
-	dURL.RawQuery = query.Encode()
-
-	ticker := time.NewTicker(time.Minute)
-	for range ticker.C {
-		sent := atomic.SwapInt64(&messagesSent, 0)
-		received := atomic.SwapInt64(&messagesReceived, 0)
-
-		data, err := buildMessagesBody(host, appName, sent, received)
-		if err != nil {
-			log.Printf("failed to build request body for datadog: %s", err)
-			continue
-		}
-
-		log.Printf("Sending data to datadog: %s", data)
-
-		response, err := httpClient.Post(dURL.String(), "application/json", bytes.NewBuffer(data))
-		if err != nil {
-			log.Printf("failed to post to datadog: %s", err)
-			continue
-		}
-
-		if response.StatusCode > 299 || response.StatusCode < 200 {
-			log.Printf("Expected successful status code from Datadog, got %d", response.StatusCode)
-			continue
-		}
-	}
-}
-
-type Metric struct {
-	Metric string    `json:"metric"`
-	Points [][]int64 `json:"points"`
-	Type   string    `json:"type"`
-	Host   string    `json:"host"`
-	Tags   []string  `json:"tags"`
-}
-
-func buildMessagesBody(host, appName string, sent, received int64) ([]byte, error) {
-	currentTime := time.Now()
-
-	metrics := []Metric{
-		{
-			Metric: "capacity_planning.sent",
-			Points: [][]int64{
-				[]int64{currentTime.Unix(), sent},
-			},
-			Type: "gauge",
-			Host: host,
-			Tags: []string{
-				appName,
-				"instance_index:" + os.Getenv("INSTANCE_INDEX"),
-				"event_type:logs",
-			},
-		},
-	}
-
-	if reportReadMessages {
-		metrics = append(metrics, Metric{
-			Metric: "capacity_planning.received",
-			Points: [][]int64{
-				[]int64{currentTime.Unix(), received},
-			},
-			Type: "gauge",
-			Host: host,
-			Tags: []string{
-				appName,
-				"instance_index:" + os.Getenv("INSTANCE_INDEX"),
-				"event_type:logs",
-			},
-		})
-	}
-
-	body := map[string][]Metric{"series": metrics}
-
-	return json.Marshal(&body)
-}
-
-func readLogsLoop(vcapApp *VCAPApplication, v2Info *V2Info, authInfo AuthInfo) {
-	for {
-		authToken, err := authenticateWithUaa(v2Info.UAAAddr, authInfo)
-		if err != nil {
-			log.Printf("failed to authenticate with UAA: %s", err)
-			time.Sleep(time.Second)
-			continue
-		}
-
-		readLogs(vcapApp.AppID, v2Info.DopplerAddr, authToken)
-	}
-}
-
-func readLogs(appID, dopplerAddr, authToken string) {
-	cmr := consumer.New(dopplerAddr, tlsConfig, nil)
-
-	msgChan, errChan := cmr.Stream(appID, authToken)
-
-	go func() {
-		for err := range errChan {
-			if err == nil {
-				return
-			}
-
-			log.Println(err)
-		}
-	}()
-
-	for msg := range msgChan {
-		if msg == nil {
-			return
-		}
-
-		if msg.GetEventType() == events.Envelope_LogMessage {
-			log := msg.GetLogMessage()
-			if bytes.Contains(log.GetMessage(), []byte(logMessage)) {
-				atomic.AddInt64(&messagesReceived, 1)
-			}
-		}
-	}
-}
-
-func emitLog() {
-	atomic.AddInt64(&messagesSent, 1)
-	fmt.Printf("%s\n", logMessage)
-}
-
-func authenticateWithUaa(uaaAddr string, authInfo AuthInfo) (string, error) {
-	response, err := httpClient.PostForm(uaaAddr+"/oauth/token", url.Values{
-		"response_type": []string{"token"},
-		"grant_type":    []string{"client_credentials"},
-		"client_id":     []string{authInfo.ClientID},
-		"client_secret": []string{authInfo.ClientSecret},
-	})
-	if err != nil {
-		return "", err
-	}
-	if response.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Expected 200 status code from /oauth/token, got %d", response.StatusCode)
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	response.Body.Close()
-	if err != nil {
-		return "", err
-	}
-
-	oauthResponse := make(map[string]interface{})
-	err = json.Unmarshal(body, &oauthResponse)
-	if err != nil {
-		return "", err
-	}
-
-	accessTokenInterface, ok := oauthResponse["access_token"]
-	if !ok {
-		return "", errors.New("No access_token on UAA oauth response")
-	}
-
-	accessToken, ok := accessTokenInterface.(string)
-	if !ok {
-		return "", errors.New("access_token on UAA oauth response not a string")
-	}
-
-	return "bearer " + accessToken, nil
 }
 
 func getV2Info(uaaAddr string) (*V2Info, error) {
