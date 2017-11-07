@@ -41,6 +41,9 @@ releases/**/*.tgz
 /src/github.com/mvdan/lint
 /src/honnef.co/go
 
+/src/github.com/codegangsta/cli
+/src/github.com/vito/gosub
+
 # misc
 out/
 release/
