@@ -2,16 +2,19 @@ name: loggregator_capacity_planning
 
 addons:
 - name: metron_agent
-  release: loggregator
-  properties:
-    metron_agent:
-      deployment: "((system_domain))"
-    loggregator:
-      tls:
-        ca_cert: "((loggregator_tls_metron.ca))"
-        metron:
-          cert: "((loggregator_tls_metron.certificate))"
-          key: "((loggregator_tls_metron.private_key))"
+  include:
+    stemcell:
+    - os: ubuntu-trusty
+  jobs:
+  - name: metron_agent
+    release: loggregator
+    properties:
+      loggregator:
+        tls:
+          ca_cert: "((loggregator_tls_metron.ca))"
+          metron:
+            cert: "((loggregator_tls_metron.certificate))"
+            key: "((loggregator_tls_metron.private_key))"
 
 stemcells:
 - alias: default
