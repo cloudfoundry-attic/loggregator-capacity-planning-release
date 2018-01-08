@@ -40,3 +40,15 @@
 [submodule "src/gopkg.in/yaml.v2"]
 	path = src/gopkg.in/yaml.v2
 	url = https://gopkg.in/yaml.v2
+[submodule "src/code.cloudfoundry.org/go-diodes"]
+	path = src/code.cloudfoundry.org/go-diodes
+	url = https://github.com/cloudfoundry/go-diodes
+[submodule "src/google.golang.org/grpc"]
+	path = src/google.golang.org/grpc
+	url = https://github.com/grpc/grpc-go
+[submodule "src/google.golang.org/genproto"]
+	path = src/google.golang.org/genproto
+	url = https://github.com/google/go-genproto
+[submodule "src/gopkg.in/check.v1"]
+	path = src/gopkg.in/check.v1
+	url = https://gopkg.in/check.v1

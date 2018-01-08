@@ -48,7 +48,7 @@ func New(
 		}
 
 		client, err = loggregator.NewIngressClient(tlsConf,
-			loggregator.WithStringTag("origin", origin),
+			loggregator.WithTag("origin", origin),
 		)
 		if err != nil {
 			log.Fatalf("failed to create v2 client: %s", err)
