@@ -1,0 +1,15 @@
+<%
+    job_name = spec.job.name || name
+    instance_id = spec.id || spec.index.to_s
+%>
+
+export EMIT_INTERVAL="<%= p('event.emit_interval') %>"
+export EVENT_TITLE="<%= p('event.title') %>"
+export EVENT_BODY="<%= p('event.body') %>"
+export DATADOG_API_KEY="<%= p('datadog.api_key') %>"
+export JOB_NAME="<%= job_name %>"
+export INSTANCE_ID="<%= instance_id %>"
+
+export CA_PATH="/var/vcap/jobs/event_emitter/config/certs/ca.crt"
+export CERT_PATH="/var/vcap/jobs/event_emitter/config/certs/client.crt"
+export KEY_PATH="/var/vcap/jobs/event_emitter/config/certs/client.key"

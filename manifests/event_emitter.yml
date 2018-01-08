@@ -1,0 +1,78 @@
+name: loggregator_capacity_planning
+
+addons:
+- name: metron_agent
+  include:
+    stemcell:
+    - os: ubuntu-trusty
+  jobs:
+  - name: metron_agent
+    release: loggregator
+    properties:
+      loggregator:
+        tls:
+          ca_cert: "((loggregator_tls_metron.ca))"
+          metron:
+            cert: "((loggregator_tls_metron.certificate))"
+            key: "((loggregator_tls_metron.private_key))"
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+releases:
+- name: loggregator-capacity-planning
+  version: latest
+- name: loggregator
+  version: latest
+
+instance_groups:
+- name: event_emitter
+  azs:
+  - z1
+  instances: 1
+  vm_type: minimal
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: event_emitter
+    release: loggregator-capacity-planning
+    properties:
+      datadog:
+        api_key: "((datadog_api_key))"
+      tls:
+        ca: "((event_emitter.ca))"
+        cert: "((event_emitter.certificate))"
+        key: "((event_emitter.private_key))"
+
+variables:
+- name: loggregator_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: CA
+- name: event_emitter
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: event_emitter
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: loggregator_tls_metron
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: metron
+    extended_key_usage:
+    - client_auth
+    - server_auth
+
+update:
+  canaries: 10
+  max_in_flight: 10
+  canary_watch_time: 30000-60000
+  update_watch_time: 5000-60000
+  serial: true

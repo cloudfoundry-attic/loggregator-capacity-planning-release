@@ -1,0 +1,35 @@
+---
+name: event_emitter
+
+templates:
+  ctl.erb: bin/ctl
+  environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  client.crt.erb: config/certs/client.crt
+  client.key.erb: config/certs/client.key
+
+packages:
+- event_emitter
+
+properties:
+  event.emit_interval:
+    default: 1s
+    description: The interval at which to emit events.
+  event.title:
+    default: "This is a test of the event broadcast system"
+    description: "The title of the emitted events"
+  event.body:
+    default: ""
+    description: "The body of the emitted events"
+
+  datadog.api_key:
+    description: "The API key used to send metrics to Datadog"
+
+  tls.ca:
+    description: "The CA certificate for validating the TLS connection to Metron"
+  tls.cert:
+    description: "The client certificate for TLS mutual auth with Metron"
+  tls.key:
+    description: "The client key for TLS mutual auth with Metron"
+
+

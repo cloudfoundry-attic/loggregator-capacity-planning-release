@@ -1,0 +1,5 @@
+check process event_emitter
+  with pidfile /var/vcap/sys/run/event_emitter/event_emitter.pid
+  start program "/var/vcap/jobs/event_emitter/bin/ctl start"
+  stop program "/var/vcap/jobs/event_emitter/bin/ctl stop"
+  group vcap

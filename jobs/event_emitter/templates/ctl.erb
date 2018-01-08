@@ -1,0 +1,49 @@
+#!/bin/bash -e
+
+RUN_DIR=/var/vcap/sys/run/event_emitter
+LOG_DIR=/var/vcap/sys/log/event_emitter
+PIDFILE=$RUN_DIR/event_emitter.pid
+ENVIRONMENT=/var/vcap/jobs/event_emitter/bin/environment.sh
+
+mkdir -p $RUN_DIR
+mkdir -p $LOG_DIR
+
+case $1 in
+
+  start)
+    set +e
+      killall -15 event_emitter
+      killall -9 event_emitter
+      killall -2 event_emitter
+      killall -3 event_emitter
+    set -e
+
+    chown -R vcap:vcap $LOG_DIR
+
+    source $ENVIRONMENT
+    chpst -u vcap:vcap /var/vcap/packages/event_emitter/event_emitter 2>&1 | \
+         tee -a "$LOG_DIR/event_emitter.log" | \
+         logger -t "vcap.event_emitter" -p user.error &
+
+    jobs -p > $PIDFILE
+
+    ;;
+
+  stop)
+    set +e
+      killall -15 event_emitter
+      killall -9 event_emitter
+      killall -2 event_emitter
+      killall -3 event_emitter
+    set -e
+
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}"
+
+    ;;
+
+esac
