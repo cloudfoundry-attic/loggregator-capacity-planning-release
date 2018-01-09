@@ -52,3 +52,6 @@
 [submodule "src/gopkg.in/check.v1"]
 	path = src/gopkg.in/check.v1
 	url = https://gopkg.in/check.v1
+[submodule "src/code.cloudfoundry.org/go-envstruct"]
+	path = src/code.cloudfoundry.org/go-envstruct
+	url = https://github.com/cloudfoundry/go-envstruct
