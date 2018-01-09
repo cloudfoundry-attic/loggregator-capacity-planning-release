@@ -1,5 +1,5 @@
 ---
-name: event_emitter
+name: v2_event_counter
 
 templates:
   ctl.erb: bin/ctl
@@ -8,30 +8,16 @@ templates:
   client.crt.erb: config/certs/client.crt
   client.key.erb: config/certs/client.key
 
-provides:
+consumes:
+- name: reverse_log_proxy
+  type: reverse_log_proxy
 - name: event_emitter
   type: event_emitter
-  properties:
-  - event.title
-  - datadog.api_key
 
 packages:
-- event_emitter
+- v2_event_counter
 
 properties:
-  event.emit_interval:
-    default: 1s
-    description: The interval at which to emit events.
-  event.title:
-    default: "This is a test of the event broadcast system"
-    description: "The title of the emitted events"
-  event.body:
-    default: ""
-    description: "The body of the emitted events"
-
-  datadog.api_key:
-    description: "The API key used to send metrics to Datadog"
-
   tls.ca:
     description: "The CA certificate for validating the TLS connection to Metron"
   tls.cert:

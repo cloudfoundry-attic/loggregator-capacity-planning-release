@@ -1,4 +1,4 @@
-name: loggregator_capacity_planning
+name: event-reliability
 
 addons:
 - name: metron_agent
@@ -46,6 +46,15 @@ instance_groups:
         ca: "((event_emitter.ca))"
         cert: "((event_emitter.certificate))"
         key: "((event_emitter.private_key))"
+  - name: v2_event_counter
+    release: loggregator-capacity-planning
+    consumes:
+      reverse_log_proxy: {from: cf}
+    properties:
+      tls:
+        ca: "((event_counter.ca))"
+        cert: "((event_counter.certificate))"
+        key: "((event_counter.private_key))"
 
 variables:
 - name: loggregator_ca
@@ -58,6 +67,14 @@ variables:
   options:
     ca: loggregator_ca
     common_name: event_emitter
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: event_counter
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: event_counter
     extended_key_usage:
     - client_auth
     - server_auth

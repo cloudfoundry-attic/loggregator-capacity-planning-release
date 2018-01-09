@@ -31,9 +31,10 @@ function sync_package() {
   )
 }
 
-sync_package event_counter  -app  code.cloudfoundry.org/event_counter &
-sync_package event_emitter  -app  code.cloudfoundry.org/event_emitter &
-sync_package metric_emitter -app  code.cloudfoundry.org/metric_emitter &
-sync_package syslog_counter -app  code.cloudfoundry.org/syslog_counter &
+sync_package event_counter    -app  code.cloudfoundry.org/event_counter &
+sync_package v2_event_counter -app  code.cloudfoundry.org/v2_event_counter &
+sync_package event_emitter    -app  code.cloudfoundry.org/event_emitter &
+sync_package metric_emitter   -app  code.cloudfoundry.org/metric_emitter &
+sync_package syslog_counter   -app  code.cloudfoundry.org/syslog_counter &
 
 wait

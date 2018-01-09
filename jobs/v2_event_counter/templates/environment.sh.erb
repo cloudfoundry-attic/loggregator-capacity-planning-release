@@ -1,0 +1,17 @@
+<%
+    job_name = spec.job.name || name
+    instance_id = spec.id || spec.index.to_s
+    rlp = link("reverse_log_proxy")
+    event_emittter = link("event_emitter")
+%>
+
+export EVENT_TITLE="<%= event_emitter.p('event.title') %>"
+export DATADOG_API_KEY="<%= event_emitter.p('datadog.api_key') %>"
+export JOB_NAME="<%= job_name %>"
+export INSTANCE_ID="<%= instance_id %>"
+
+export CA_PATH="/var/vcap/jobs/v2_event_counter/config/certs/ca.crt"
+export CERT_PATH="/var/vcap/jobs/v2_event_counter/config/certs/client.crt"
+export KEY_PATH="/var/vcap/jobs/v2_event_counter/config/certs/client.key"
+
+export LOG_PROXY_ADDR="<%= rlp.address %>:<%= rlp.p('reverse_log_proxy.egress.port') %>"

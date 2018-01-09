@@ -1,0 +1,5 @@
+check process v2_event_counter
+  with pidfile /var/vcap/sys/run/v2_event_counter/v2_event_counter.pid
+  start program "/var/vcap/jobs/v2_event_counter/bin/ctl start"
+  stop program "/var/vcap/jobs/v2_event_counter/bin/ctl stop"
+  group vcap

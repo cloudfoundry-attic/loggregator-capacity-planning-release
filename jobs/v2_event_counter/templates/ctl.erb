@@ -1,0 +1,49 @@
+#!/bin/bash -e
+
+RUN_DIR=/var/vcap/sys/run/v2_event_counter
+LOG_DIR=/var/vcap/sys/log/v2_event_counter
+PIDFILE=$RUN_DIR/v2_event_counter.pid
+ENVIRONMENT=/var/vcap/jobs/v2_event_counter/bin/environment.sh
+
+mkdir -p $RUN_DIR
+mkdir -p $LOG_DIR
+
+case $1 in
+
+  start)
+    set +e
+      killall -15 v2_event_counter
+      killall -9 v2_event_counter
+      killall -2 v2_event_counter
+      killall -3 v2_event_counter
+    set -e
+
+    chown -R vcap:vcap $LOG_DIR
+
+    source $ENVIRONMENT
+    chpst -u vcap:vcap /var/vcap/packages/v2_event_counter/v2_event_counter 2>&1 | \
+         tee -a "$LOG_DIR/v2_event_counter.log" | \
+         logger -t "vcap.v2_event_counter" -p user.error &
+
+    jobs -p > $PIDFILE
+
+    ;;
+
+  stop)
+    set +e
+      killall -15 v2_event_counter
+      killall -9 v2_event_counter
+      killall -2 v2_event_counter
+      killall -3 v2_event_counter
+    set -e
+
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}"
+
+    ;;
+
+esac

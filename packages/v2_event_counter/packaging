@@ -1,0 +1,10 @@
+set -e
+
+export GOROOT=$(readlink -nf /var/vcap/packages/golang1.9.2)
+export PATH=$GOROOT/bin:$PATH
+export GOPATH=$PWD
+
+ln -s $GOPATH $GOPATH/src
+
+go install code.cloudfoundry.org/v2_event_counter
+cp -a $GOPATH/bin/v2_event_counter ${BOSH_INSTALL_TARGET}
