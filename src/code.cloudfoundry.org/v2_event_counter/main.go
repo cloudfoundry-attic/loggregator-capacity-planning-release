@@ -89,7 +89,6 @@ func (r *reader) run() {
 
 	for {
 		envelopes := stream()
-		log.Printf("Read %d envelopes", len(envelopes))
 		for _, env := range envelopes {
 			if env.GetEvent().GetTitle() == r.title {
 				atomic.AddInt64(&r.eventCount, 1)
