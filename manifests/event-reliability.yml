@@ -8,24 +8,24 @@ addons:
   jobs:
   - name: metron_agent
     release: loggregator
+    consumes:
+      doppler: {deployment: cf, from: doppler}
     properties:
+      metron_agent:
+        bosh_dns: true
       loggregator:
         tls:
           ca_cert: "((loggregator_tls_metron.ca))"
           metron:
             cert: "((loggregator_tls_metron.certificate))"
             key: "((loggregator_tls_metron.private_key))"
-
-stemcells:
-- alias: default
-  os: ubuntu-trusty
-  version: latest
-
-releases:
-- name: loggregator-capacity-planning
-  version: latest
-- name: loggregator
-  version: latest
+- name: bosh-dns
+  include:
+    stemcell:
+    - os: ubuntu-trusty
+  jobs:
+  - name: bosh-dns
+    release: bosh-dns
 
 instance_groups:
 - name: event_emitter
@@ -40,8 +40,9 @@ instance_groups:
   - name: event_emitter
     release: loggregator-capacity-planning
     properties:
+      host: "((system_domain))"
       datadog:
-        api_key: "((datadog_api_key))"
+        api_key: "((datadog_key))"
       tls:
         ca: "((event_emitter.ca))"
         cert: "((event_emitter.certificate))"
@@ -49,12 +50,27 @@ instance_groups:
   - name: v2_event_counter
     release: loggregator-capacity-planning
     consumes:
-      reverse_log_proxy: {from: cf}
+      reverse_log_proxy: {deployment: cf, from: reverse_log_proxy}
     properties:
       tls:
         ca: "((event_counter.ca))"
         cert: "((event_counter.certificate))"
         key: "((event_counter.private_key))"
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+releases:
+- name: loggregator-capacity-planning
+  version: latest
+- name: loggregator
+  version: latest
+- name: bosh-dns
+  sha1: 9231b7c7d2f6aa85e0cb77fdeef7add54fdb3f1a
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-release?v=0.2.0
+  version: 0.2.0
 
 variables:
 - name: loggregator_ca

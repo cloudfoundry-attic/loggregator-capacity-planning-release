@@ -17,8 +17,9 @@ type Config struct {
 	EventTitle    string        `env:"EVENT_TITLE"`
 	EventBody     string        `env:"EVENT_BODY"`
 	DatadogAPIKey string        `env:"DATADOG_API_KEY, required"`
-	JobName       string        `env:"JOB_NAME"`
-	InstanceID    string        `env:"INSTANCE_ID"`
+	JobName       string        `env:"JOB_NAME,        required"`
+	InstanceID    string        `env:"INSTANCE_ID,     required"`
+	Host          string        `env:"HOST,            required"`
 
 	CAPath   string `env:"CA_PATH,   required"`
 	KeyPath  string `env:"KEY_PATH,  required"`
@@ -51,6 +52,7 @@ func main() {
 		cfg.JobName,
 		cfg.InstanceID,
 		wr,
+		datadogreporter.WithHost(cfg.Host),
 	)
 	reporter.Run()
 }

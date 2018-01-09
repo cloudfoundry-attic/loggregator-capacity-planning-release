@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log"
+	"os"
 	"sync/atomic"
 	"time"
 
@@ -14,10 +16,11 @@ import (
 )
 
 type Config struct {
-	DatadogAPIKey string `env:"DATADOG_API_KEY, required"`
 	EventTitle    string `env:"EVENT_TITLE"`
-	JobName       string `env:"JOB_NAME"`
-	InstanceID    string `env:"INSTANCE_ID"`
+	DatadogAPIKey string `env:"DATADOG_API_KEY, required"`
+	JobName       string `env:"JOB_NAME,        required"`
+	InstanceID    string `env:"INSTANCE_ID,     required"`
+	Host          string `env:"HOST,            required"`
 
 	CAPath   string `env:"CA_PATH,   required"`
 	KeyPath  string `env:"KEY_PATH,  required"`
@@ -50,6 +53,7 @@ func main() {
 		cfg.JobName,
 		cfg.InstanceID,
 		reader,
+		datadogreporter.WithHost(cfg.Host),
 	)
 
 	reporter.Run()
@@ -63,13 +67,17 @@ type reader struct {
 
 func newReader(title string, logProxyAddr string, tlsConfig *tls.Config) *reader {
 	return &reader{
-		title:  title,
-		client: loggregator.NewEnvelopeStreamConnector(logProxyAddr, tlsConfig),
+		title: title,
+		client: loggregator.NewEnvelopeStreamConnector(logProxyAddr, tlsConfig,
+			loggregator.WithEnvelopeStreamLogger(log.New(os.Stdout, "", log.LstdFlags)),
+		),
 	}
 }
 
 func (r *reader) run() {
 	stream := r.client.Stream(context.Background(), &loggregator_v2.EgressBatchRequest{
+		ShardId:          fmt.Sprintf("%d", time.Now().UnixNano()),
+		UsePreferredTags: true,
 		Selectors: []*loggregator_v2.Selector{
 			{
 				Message: &loggregator_v2.Selector_Event{
@@ -81,6 +89,7 @@ func (r *reader) run() {
 
 	for {
 		envelopes := stream()
+		log.Printf("Read %d envelopes", len(envelopes))
 		for _, env := range envelopes {
 			if env.GetEvent().GetTitle() == r.title {
 				atomic.AddInt64(&r.eventCount, 1)

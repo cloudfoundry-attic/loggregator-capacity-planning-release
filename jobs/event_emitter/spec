@@ -14,6 +14,7 @@ provides:
   properties:
   - event.title
   - datadog.api_key
+  - host
 
 packages:
 - event_emitter
@@ -31,6 +32,8 @@ properties:
 
   datadog.api_key:
     description: "The API key used to send metrics to Datadog"
+  host:
+    description: "The host to set on metrics sent to Datadog"
 
   tls.ca:
     description: "The CA certificate for validating the TLS connection to Metron"
