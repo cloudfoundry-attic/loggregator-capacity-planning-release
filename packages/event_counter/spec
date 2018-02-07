@@ -2,7 +2,7 @@
 name: event_counter
 
 dependencies:
-- golang1.9.2
+- golang1.9.4
 
 files:
 - code.cloudfoundry.org/authenticator/*.go # gosub
