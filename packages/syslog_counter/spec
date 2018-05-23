@@ -2,7 +2,7 @@
 name: syslog_counter
 
 dependencies:
-- golang1.10.2
+- golang1.9.6
 
 files:
 - code.cloudfoundry.org/datadogreporter/*.go # gosub
