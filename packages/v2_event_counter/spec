@@ -2,7 +2,7 @@
 name: v2_event_counter
 
 dependencies:
-- golang1.11.1
+- golang1.11.2
 
 files:
 
